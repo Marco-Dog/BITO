@@ -3,60 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>虛擬貨幣交易紀錄</title>
-    <link rel="stylesheet" href="style.css">
+    <title>虛擬貨幣交易追蹤</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.x/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto p-4">
+        <h1 class="text-3xl font-bold mb-4">虛擬貨幣交易追蹤</h1>
+        <div class="mb-4">
+            <label class="block">幣別</label>
+            <select id="cryptoType" class="border p-2 w-full">
+                <option value="BTC">BTC</option>
+                <option value="ETH">ETH</option>
+                <option value="ADA">ADA</option>
+                <option value="DOGE">DOGE</option>
+                <option value="SHIB">SHIB</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label class="block">價格</label>
+            <input type="number" id="price" class="border p-2 w-full">
+        </div>
+        <div class="mb-4">
+            <label class="block">數量</label>
+            <input type="number" id="quantity" class="border p-2 w-full">
+        </div>
+        <button onclick="addTransaction()" class="bg-blue-500 text-white px-4 py-2 rounded">新增交易</button>
 
-    <div class="container">
-        <h1>虛擬貨幣交易紀錄與即時報價</h1>
-
-        <!-- 即時報價區塊 -->
-        <section id="prices">
-            <h2>即時報價</h2>
-            <div class="quotes-container">
-                <div class="quote" id="btc-quote">
-                    <h3>比特幣 (BTC)</h3>
-                    <p id="btc-price">-- $</p>
-                    <p>持倉量: <span id="btc-position">0</span></p>
-                    <p>獲利: <span id="btc-profit">0 $</span></p>
-                    <p>報酬率: <span id="btc-return">-- %</span></p>
-                </div>
-                <div class="quote" id="eth-quote">
-                    <h3>以太坊 (ETH)</h3>
-                    <p id="eth-price">-- $</p>
-                    <p>持倉量: <span id="eth-position">0</span></p>
-                    <p>獲利: <span id="eth-profit">0 $</span></p>
-                    <p>報酬率: <span id="eth-return">-- %</span></p>
-                </div>
-                <div class="quote" id="ada-quote">
-                    <h3>艾達幣 (ADA)</h3>
-                    <p id="ada-price">-- $</p>
-                    <p>持倉量: <span id="ada-position">0</span></p>
-                    <p>獲利: <span id="ada-profit">0 $</span></p>
-                    <p>報酬率: <span id="ada-return">-- %</span></p>
-                </div>
-                <div class="quote" id="doge-quote">
-                    <h3>狗狗幣 (DOGE)</h3>
-                    <p id="doge-price">-- $</p>
-                    <p>持倉量: <span id="doge-position">0</span></p>
-                    <p>獲利: <span id="doge-profit">0 $</span></p>
-                    <p>報酬率: <span id="doge-return">-- %</span></p>
-                </div>
-                <div class="quote" id="shib-quote">
-                    <h3>柴犬幣 (SHIB)</h3>
-                    <p id="shib-price">-- $</p>
-                    <p>持倉量: <span id="shib-position">0</span></p>
-                    <p>獲利: <span id="shib-profit">0 $</span></p>
-                    <p>報酬率: <span id="shib-return">-- %</span></p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 其他區塊 (例如交易紀錄、表單等) 可以根據需要添加 -->
-
+        <h2 class="text-2xl font-bold mt-6">交易紀錄</h2>
+        <table class="min-w-full mt-4 border-collapse border border-gray-300">
+            <thead>
+                <tr>
+                    <th class="border border-gray-300 px-4 py-2">日期</th>
+                    <th class="border border-gray-300 px-4 py-2">幣別</th>
+                    <th class="border border-gray-300 px-4 py-2">價格</th>
+                    <th class="border border-gray-300 px-4 py-2">數量</th>
+                    <th class="border border-gray-300 px-4 py-2">手續費</th>
+                    <th class="border border-gray-300 px-4 py-2">刪除</th>
+                </tr>
+            </thead>
+            <tbody id="transactionTable"></tbody>
+        </table>
     </div>
 
-    <script src="app.js"></script>
+    <script>
+        const API_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,dogecoin,shiba-inu&vs_currencies=twd";
+        const FEE_BUY = 0.001;
+        const FEE_SELL = 0.002;
+
+        function fetchPrices() {
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('price').value = data["bitcoin"].twd;
+                });
+        }
+
+        setInterval(fetchPrices, 10000);
+
+        function addTransaction() {
+            const cryptoType = document.getElementById('cryptoType').value;
+            const price = parseFloat(document.getElementById('price').value);
+            const quantity = parseFloat(document.getElementById('quantity').value);
+            const fee = price * quantity * FEE_BUY;
+            const date = new Date().toLocaleString();
+
+            const transaction = { date, cryptoType, price, quantity, fee };
+            saveTransaction(transaction);
+            renderTransactions();
+        }
+
+        function saveTransaction(transaction) {
+            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            transactions.push(transaction);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        function renderTransactions() {
+            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            document.getElementById('transactionTable').innerHTML = transactions.map(tx => `
+                <tr>
+                    <td class="border px-4 py-2">${tx.date}</td>
+                    <td class="border px-4 py-2">${tx.cryptoType}</td>
+                    <td class="border px-4 py-2">${tx.price}</td>
+                    <td class="border px-4 py-2">${tx.quantity}</td>
+                    <td class="border px-4 py-2">${tx.fee.toFixed(2)}</td>
+                    <td class="border px-4 py-2"><button onclick="deleteTransaction('${tx.date}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button></td>
+                </tr>`).join('');
+        }
+
+        function deleteTransaction(date) {
+            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            transactions = transactions.filter(tx => tx.date !== date);
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+            renderTransactions();
+        }
+
+        renderTransactions();
+    </script>
 </body>
 </html>
