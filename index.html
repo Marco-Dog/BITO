@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>即時報價與交易紀錄</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="quotes-container">
+    <div class="quote" id="btc-quote">
+      <h3>比特幣 (BTC)</h3>
+      <p id="btc-price">-- TWD</p>
+      <p>持倉量: <span id="btc-position">0</span></p>
+      <p>獲利: <span id="btc-profit">0 TWD</span></p>
+      <p>報酬率: <span id="btc-return">-- %</span></p>
+    </div>
+    <div class="quote" id="eth-quote">
+      <h3>以太坊 (ETH)</h3>
+      <p id="eth-price">-- TWD</p>
+      <p>持倉量: <span id="eth-position">0</span></p>
+      <p>獲利: <span id="eth-profit">0 TWD</span></p>
+      <p>報酬率: <span id="eth-return">-- %</span></p>
+    </div>
+    <div class="quote" id="ada-quote">
+      <h3>艾達幣 (ADA)</h3>
+      <p id="ada-price">-- TWD</p>
+      <p>持倉量: <span id="ada-position">0</span></p>
+      <p>獲利: <span id="ada-profit">0 TWD</span></p>
+      <p>報酬率: <span id="ada-return">-- %</span></p>
+    </div>
+    <div class="quote" id="doge-quote">
+      <h3>狗狗幣 (DOGE)</h3>
+      <p id="doge-price">-- TWD</p>
+      <p>持倉量: <span id="doge-position">0</span></p>
+      <p>獲利: <span id="doge-profit">0 TWD</span></p>
+      <p>報酬率: <span id="doge-return">-- %</span></p>
+    </div>
+    <div class="quote" id="shib-quote">
+      <h3>柴犬幣 (SHIB)</h3>
+      <p id="shib-price">-- TWD</p>
+      <p>持倉量: <span id="shib-position">0</span></p>
+      <p>獲利: <span id="shib-profit">0 TWD</span></p>
+      <p>報酬率: <span id="shib-return">-- %</span></p>
+    </div>
+  </div>
+
+  <hr>
+
+  <h2>交易紀錄</h2>
+  <form id="transaction-form">
+    <label for="transaction-date">日期</label>
+    <input type="date" id="transaction-date" required>
+    
+    <label for="transaction-currency">幣別</label>
+    <select id="transaction-currency" required>
+      <option value="BTC">比特幣 (BTC)</option>
+      <option value="ETH">以太坊 (ETH)</option>
+      <option value="ADA">艾達幣 (ADA)</option>
+      <option value="DOGE">狗狗幣 (DOGE)</option>
+      <option value="SHIB">柴犬幣 (SHIB)</option>
+    </select>
+    
+    <label for="transaction-type">買入/賣出</label>
+    <select id="transaction-type" required>
+      <option value="Buy">買入</option>
+      <option value="Sell">賣出</option>
+    </select>
+    
+    <label for="transaction-price">價格 (TWD)</label>
+    <input type="number" id="transaction-price" step="0.01" required>
+    
+    <label for="transaction-quantity">數量</label>
+    <input type="number" id="transaction-quantity" step="0.01" required>
+    
+    <label for="transaction-note">備註</label>
+    <input type="text" id="transaction-note">
+    
+    <button type="submit">提交交易</button>
+  </form>
+
+  <h3>交易紀錄列表</h3>
+  <table id="transaction-list">
+    <thead>
+      <tr>
+        <th>日期</th>
+        <th>幣別</th>
+        <th>買入/賣出</th>
+        <th>價格</th>
+        <th>數量</th>
+        <th>手續費</th>
+        <th>備註</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 交易紀錄會在這裡顯示 -->
+    </tbody>
+  </table>
+
+  <script src="app.js"></script>
+</body>
+</html>
