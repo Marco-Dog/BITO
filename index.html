@@ -4,101 +4,76 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>虛擬貨幣交易追蹤</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.x/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold mb-4">虛擬貨幣交易追蹤</h1>
-        <div class="mb-4">
-            <label class="block">幣別</label>
-            <select id="cryptoType" class="border p-2 w-full">
-                <option value="BTC">BTC</option>
-                <option value="ETH">ETH</option>
-                <option value="ADA">ADA</option>
-                <option value="DOGE">DOGE</option>
-                <option value="SHIB">SHIB</option>
-            </select>
-        </div>
-        <div class="mb-4">
-            <label class="block">價格</label>
-            <input type="number" id="price" class="border p-2 w-full">
-        </div>
-        <div class="mb-4">
-            <label class="block">數量</label>
-            <input type="number" id="quantity" class="border p-2 w-full">
-        </div>
-        <button onclick="addTransaction()" class="bg-blue-500 text-white px-4 py-2 rounded">新增交易</button>
+<body>
+    <div id="container">
+        <!-- 標題區域 -->
+        <header>
+            <h1>虛擬貨幣追蹤</h1>
+              <div id="summary">
+                  <p id="total-profit">總持倉獲利: NT$ 0.00</p>
+                  <p id="total-roi">總報酬率: 0%</p>
+              </div>        
+        </header>
 
-        <h2 class="text-2xl font-bold mt-6">交易紀錄</h2>
-        <table class="min-w-full mt-4 border-collapse border border-gray-300">
-            <thead>
-                <tr>
-                    <th class="border border-gray-300 px-4 py-2">日期</th>
-                    <th class="border border-gray-300 px-4 py-2">幣別</th>
-                    <th class="border border-gray-300 px-4 py-2">價格</th>
-                    <th class="border border-gray-300 px-4 py-2">數量</th>
-                    <th class="border border-gray-300 px-4 py-2">手續費</th>
-                    <th class="border border-gray-300 px-4 py-2">刪除</th>
-                </tr>
-            </thead>
-            <tbody id="transactionTable"></tbody>
-        </table>
+        <!-- 頁籤切換 -->
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="switchTab('crypto-info')">幣種資訊</button>
+            <button class="tab-button" onclick="switchTab('transaction-history')">交易紀錄</button>
+        </div>
+
+        <!-- 幣種資訊頁籤 -->
+        <div id="crypto-info" class="tabcontent">
+            <div id="crypto-container"></div>
+        </div>
+
+        <!-- 交易紀錄頁籤 -->
+        <div id="transaction-history" class="tabcontent" style="display:none;">
+            <h2>交易紀錄</h2>
+            
+            <!-- 新增交易表單 -->
+            <form id="transactionForm">
+                <label for="date">日期:</label><input type="date" id="date" required><br>
+                <label for="currency">幣別:</label>
+                <select id="currency" required>
+                    <option value="btc">BTC</option>
+                    <option value="eth">ETH</option>
+                    <option value="doge">DOGE</option>
+                    <option value="ada">ADA</option>
+                    <option value="shib">SHIB</option>
+                    <option value="shib">SOL</option>
+                </select><br>
+                <label for="type">類型:</label>
+                <select id="type" required>
+                    <option value="BUY">買入</option>
+                    <option value="SELL">賣出</option>
+                </select><br>
+                <label for="price">價格:</label><input type="number" id="price" step="0.01" required><br>
+                <label for="quantity">數量:</label><input type="number" id="quantity" step="0.00000001" required><br>
+                <label for="note">備註:</label><textarea id="note"></textarea><br>
+                <button type="submit">提交</button>
+            </form>
+
+            <!-- 交易紀錄表格 -->
+            <table id="transactionTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>幣別</th>
+                        <th>類型</th>
+                        <th>價格</th>
+                        <th>數量</th>
+                        <th>手續費</th>
+                        <th>備註</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
 
-    <script>
-        const API_URL = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,dogecoin,shiba-inu&vs_currencies=twd";
-        const FEE_BUY = 0.001;
-        const FEE_SELL = 0.002;
-
-        function fetchPrices() {
-            fetch(API_URL)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('price').value = data["bitcoin"].twd;
-                });
-        }
-
-        setInterval(fetchPrices, 10000);
-
-        function addTransaction() {
-            const cryptoType = document.getElementById('cryptoType').value;
-            const price = parseFloat(document.getElementById('price').value);
-            const quantity = parseFloat(document.getElementById('quantity').value);
-            const fee = price * quantity * FEE_BUY;
-            const date = new Date().toLocaleString();
-
-            const transaction = { date, cryptoType, price, quantity, fee };
-            saveTransaction(transaction);
-            renderTransactions();
-        }
-
-        function saveTransaction(transaction) {
-            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            transactions.push(transaction);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-        }
-
-        function renderTransactions() {
-            const transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            document.getElementById('transactionTable').innerHTML = transactions.map(tx => `
-                <tr>
-                    <td class="border px-4 py-2">${tx.date}</td>
-                    <td class="border px-4 py-2">${tx.cryptoType}</td>
-                    <td class="border px-4 py-2">${tx.price}</td>
-                    <td class="border px-4 py-2">${tx.quantity}</td>
-                    <td class="border px-4 py-2">${tx.fee.toFixed(2)}</td>
-                    <td class="border px-4 py-2"><button onclick="deleteTransaction('${tx.date}')" class="bg-red-500 text-white px-2 py-1 rounded">刪除</button></td>
-                </tr>`).join('');
-        }
-
-        function deleteTransaction(date) {
-            let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            transactions = transactions.filter(tx => tx.date !== date);
-            localStorage.setItem('transactions', JSON.stringify(transactions));
-            renderTransactions();
-        }
-
-        renderTransactions();
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
